@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'DevopsAgentLabelV4' }
+    agent { label 'DevopsAgentLabelV5' }
     tools {
         jdk 'SystemJDK'
         nodejs 'node20'
