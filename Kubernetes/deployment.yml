@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: netflix-app
-        image: shaikhdocker/netflix:latest
+        image: shaikhdocker/netflix:${BUILD_NUMBER}
         ports:
         - containerPort: 80
