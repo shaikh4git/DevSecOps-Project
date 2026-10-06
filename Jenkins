@@ -1,5 +1,8 @@
 pipeline {
     agent { label 'DevopsAgentLabelV5' }
+    environment{
+        OPENSHIFT_API = "https://host.docker.internal:6443"
+    }
     tools {
         jdk 'SystemJDK'
         nodejs 'node20'
