@@ -33,6 +33,17 @@ pipeline {
                 }
             } 
         }
+        stage('Install Dependencies') {
+            steps {
+                sh "npm install"
+            }
+        }
+        stage('OWASP FS SCAN') {
+            steps {
+                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        }
 
         stage('TRIVY FS SCAN') {
             steps {
@@ -68,58 +79,6 @@ pipeline {
                 fi
                 docker run -d --name netflix -p 8081:80 shaikhdocker/netflix:latest
                 '''
-            }
-        }
-
-        stage('Deploy to my OpenShift Cluster'){
-            steps{
-                withCredentials([string(credentialsId: 'ocnetflix-sa-token-ID', variable: 'TOKEN')]) {
-                    sh '''
-                        echo "Loggin to the OpenShift using the service account token"
-                        oc login $OPENSHIFT_API --token=$TOKEN --insecure-skip-tls-verify=true
-                        echo "Selecting project..."
-                        oc project netflix
-                        
-                        echo "Checking deployment..."
-                        if ! oc get deployment netflix >/dev/null 2>&1; then
-                            echo "Creating deployment..."
-                            oc create deployment netflix --image=docker.io/shaikhdocker/netflix:latest --replicas 2
-                            oc set serviceaccount deployment/netflix jenkins-sa
-                            # Scale replicas
-                            oc scale deployment/netflix --replicas=3
-                            oc rollout status deployment/netflix
-                        fi
-                        
-                        echo "Checking service..."
-                        if ! oc get service netflix >/dev/null 2>&1; then
-                            echo "Creating service..."
-                            oc expose deployment netflix --port=80
-                        fi
-                        
-                        echo "Checking route..."
-                        if ! oc get route netflix >/dev/null 2>&1; then
-                            echo "Creating route..."
-                            oc expose service netflix
-                        fi
-                        
-                        
-                        echo ""
-                        echo "========== Deployments =========="
-                        oc get deployment
-                        
-                        echo ""
-                        echo "========== Pods =========="
-                        oc get pods -o wide
-                        
-                        echo ""
-                        echo "========== Services =========="
-                        oc get svc
-                        
-                        echo ""
-                        echo "========== Routes =========="
-                        oc get routes
-                       '''
-                }
             }
         }
 
