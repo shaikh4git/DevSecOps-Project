@@ -45,8 +45,8 @@ pipeline {
                   sh '''
                        echo "$DOCKER_API_KEY" | docker login -u "shaikhdocker" --password-stdin
                        docker buildx build --build-arg TMDB_V3_API_KEY=$TMDB_KEY  -t netflix .
-                       docker  tag netflix shaikhdocker/netflix:latest 
-                       docker  push shaikhdocker/netflix:latest 
+                       docker  tag netflix shaikhdocker/netflix:${BUILD_NUMBER} 
+                       docker  push shaikhdocker/netflix:${BUILD_NUMBER} 
                     '''
                }
             }
