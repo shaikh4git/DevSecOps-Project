@@ -53,7 +53,7 @@ pipeline {
         }
         stage("TRIVY"){
             steps{
-                sh "/home/jenkins/bin/trivy image shaikhdocker/netflix:latest > trivyimage.txt" 
+                sh "/home/jenkins/bin/trivy image shaikhdocker/netflix:${BUILD_NUMBER} > trivyimage.txt" 
             }
         }
         stage('Deploy to Docker, Staging Environment'){
@@ -63,7 +63,7 @@ pipeline {
                     echo "Removing existing container: netflix"
                     docker rm -f netflix
                 fi
-                docker run -d --name netflix -p 8081:80 shaikhdocker/netflix:latest
+                docker run -d --name netflix -p 8081:80 shaikhdocker/netflix:${BUILD_NUMBER}
                 '''
             }
         }
