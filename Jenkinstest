@@ -1,0 +1,60 @@
+pipeline {
+    agent { label 'DevopsAgentLabelV5' }
+    environment{
+        OPENSHIFT_API = "https://host.docker.internal:6443"
+    }
+    tools {
+        jdk 'SystemJDK'
+        nodejs 'node20'
+    }
+    stages {
+        stage('clean workspace') {
+            steps {
+                cleanWs()
+            }
+        }
+        stage('Checkout from Git') {
+            steps {
+                git branch: 'main', url: 'https://github.com/shaikh4git/DevSecOps-Project.git'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh "npm install"
+            }
+        }
+        stage('OWASP FS SCAN') {
+            steps {
+                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                withCredentials([file(credentialsId: 'k8s-kubeconfig', variable: 'KUBECONFIG')]) {
+                    sh '''
+                        kubectl get nodes --kubeconfig=$KUBECONFIG
+                        kubectl create namespace netflix --kubeconfig=$KUBECONFIG --dry-run=client -o yaml | kubectl apply -f - --kubeconfig=$KUBECONFIG
+                        kubectl apply -f Kubernetes/deployment.yml -n netflix --kubeconfig=$KUBECONFIG
+                        kubectl apply -f Kubernetes/service.yml -n netflix --kubeconfig=$KUBECONFIG
+                       '''
+              }
+           }
+        }
+    }
+    
+post {
+    always {
+        emailext attachLog: true,
+            subject: "${currentBuild.result}",
+            body: "Project: ${env.JOB_NAME}<br/>" +
+                  "Build Number: ${env.BUILD_NUMBER}<br/>" +
+                  "URL: ${env.BUILD_URL}<br/>",
+            to: 'shaikh4huda@gmail.com',
+            attachmentsPattern: 'trivyfs.txt,trivyimage.txt'
+    }
+}
+
+}
