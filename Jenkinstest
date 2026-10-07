@@ -2,9 +2,10 @@ pipeline {
     agent { label 'DevopsAgentLabelV5' }
     environment{
         OPENSHIFT_API = "https://host.docker.internal:6443"
+        JAVA_HOME = '/opt/java/openjdk'
+        PATH = "/opt/java/openjdk/bin:${env.PATH}"
     }
     tools {
-        jdk 'SystemJDK'
         nodejs 'node20'
     }
     stages {
@@ -16,6 +17,17 @@ pipeline {
         stage('Checkout from Git') {
             steps {
                 git branch: 'main', url: 'https://github.com/shaikh4git/DevSecOps-Project.git'
+            }
+        }
+        stage('Verify Java') {
+            steps {
+            sh '''
+                echo "JAVA_HOME=$JAVA_HOME"
+                echo "PATH=$PATH"
+                which java
+                java -version
+                $JAVA_HOME/bin/java -version
+               '''
             }
         }
 
