@@ -121,14 +121,14 @@ EOF
 
                         cd gitops
 
-                        test -f netflix/deployment.yml
+                        test -f netflix/deployment.yaml
 
                         python3 - <<'PY'
 import os
 import re
 from pathlib import Path
 
-path = Path("netflix/deployment.yml")
+path = Path("netflix/deployment.yaml")
 text = path.read_text()
 
 image = os.environ["FULL_IMAGE"]
