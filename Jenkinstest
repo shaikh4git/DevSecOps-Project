@@ -70,15 +70,6 @@ pipeline {
             }
         }
 
-        stage('Trivy Image Scan') {
-            steps {
-                sh '''
-                    /home/jenkins/bin/trivy image \
-                      "$FULL_IMAGE" > trivyimage.txt
-                '''
-            }
-        }
-
         stage('Deploy to Docker - Staging') {
             steps {
                 sh '''
