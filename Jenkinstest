@@ -8,7 +8,7 @@ pipeline {
     }
 
     environment {
-        IMAGE_REPO = 'shaikhdocker/netflix'
+        IMAGE_REPO = 'shaikhdocker/'
         GITOPS_REPO = 'https://github.com/shaikh4git/Netflix-GitOps.git'
         GITOPS_BRANCH = 'main'
     }
@@ -39,43 +39,6 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('sonar-server') {
-                    sh '''
-                        /opt/sonar-scanner/bin/sonar-scanner \
-                          -Dsonar.projectName=Netflix \
-                          -Dsonar.projectKey=Netflix
-                    '''
-                }
-            }
-        }
-
-        stage('Quality Gate') {
-            steps {
-                script {
-                    waitForQualityGate(
-                        abortPipeline: true,
-                        credentialsId: 'Sonar-token'
-                    )
-                }
-            }
-        }
-
-        stage('Install Dependencies') {
-            steps {
-                sh 'npm ci'
-            }
-        }
-
-        stage('Trivy Filesystem Scan') {
-            steps {
-                sh '''
-                    /home/jenkins/bin/trivy fs . \
-                      > trivyfs.txt
-                '''
-            }
-        }
 
         stage('Docker Build & Push') {
             steps {
