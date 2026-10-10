@@ -152,7 +152,7 @@ PY
                         git config user.name "Jenkins CI"
                         git config user.email "jenkins@localhost"
 
-                        git add netflix/deployment.yml
+                        git add netflix/deployment.yaml
                         git commit -m "Deploy Netflix $FULL_IMAGE"
 
                         git push origin "HEAD:$GITOPS_BRANCH"
