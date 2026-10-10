@@ -70,24 +70,6 @@ pipeline {
             }
         }
 
-        stage('Deploy to Docker - Staging') {
-            steps {
-                sh '''
-                    docker pull "$FULL_IMAGE"
-
-                    if docker ps -aq \
-                      --filter "name=^netflix$" | grep -q .; then
-                        docker rm -f netflix
-                    fi
-
-                    docker run -d \
-                      --name netflix \
-                      -p 8081:80 \
-                      "$FULL_IMAGE"
-                '''
-            }
-        }
-
         stage('Update GitOps Repository') {
             steps {
                 withCredentials([
