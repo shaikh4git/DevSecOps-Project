@@ -8,7 +8,7 @@ pipeline {
     }
 
     environment {
-        IMAGE_REPO = 'shaikhdocker/'
+        IMAGE_REPO = 'shaikhdocker/netflix'
         GITOPS_REPO = 'https://github.com/shaikh4git/Netflix-GitOps.git'
         GITOPS_BRANCH = 'main'
     }
