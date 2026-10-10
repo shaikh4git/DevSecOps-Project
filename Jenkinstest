@@ -88,13 +88,6 @@ pipeline {
             }
         }
 
-        stage('Approval for Production') {
-            steps {
-                input message: "Deploy ${env.FULL_IMAGE} to Kubernetes?",
-                      ok: 'Approve Production Deployment'
-            }
-        }
-
         stage('Update GitOps Repository') {
             steps {
                 withCredentials([
