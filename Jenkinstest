@@ -25,7 +25,7 @@ pipeline {
             }
         }
 
-        stage('Checkout from Github Repository') {
+        stage('Checkout from Github Repositories') {
             steps {
                 git branch: 'main',
                     url: 'https://github.com/shaikh4git/DevSecOps-Project.git'
