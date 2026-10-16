@@ -121,14 +121,14 @@ EOF
 
                         cd gitops
 
-                        test -f netflix/deployment.yaml
+                        test -f netflix/ArgoCD/deployment.yaml
 
                         python3 - <<'PY'
 import os
 import re
 from pathlib import Path
 
-path = Path("netflix/deployment.yaml")
+path = Path("netflix/ArgoCD/deployment.yaml")
 text = path.read_text()
 
 image = os.environ["FULL_IMAGE"]
@@ -152,7 +152,7 @@ PY
                         git config user.name "Jenkins CI"
                         git config user.email "jenkins@localhost"
 
-                        git add netflix/deployment.yaml
+                        git add netflix/ArgoCD/deployment.yaml
                         git commit -m "Deploy Netflix $FULL_IMAGE"
 
                         git push origin "HEAD:$GITOPS_BRANCH"
