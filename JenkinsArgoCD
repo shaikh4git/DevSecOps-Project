@@ -169,7 +169,7 @@ PY
                 Image: ${env.FULL_IMAGE}
                 Repository: ${env.GITOPS_REPO}
 
-                Argo CD will reconcile the Netflix application.
+                Argo CD will reconcile the Netflix application!
                 """
             }
         }
