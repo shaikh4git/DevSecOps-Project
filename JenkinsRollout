@@ -8,7 +8,7 @@ pipeline {
     }
 
     environment {
-        IMAGE_REPO = 'shaikhdocker/netflix/rollout'
+        IMAGE_REPO = 'shaikhdocker/netflix'
         GITOPS_REPO = 'https://github.com/shaikh4git/Netflix-GitOps.git'
         GITOPS_BRANCH = 'main'
     }
@@ -136,7 +136,7 @@ pipeline {
         
         pattern = (
             r'(?m)^(\\s*image:\\s*)'
-            r'shaikhdocker/netflix/rollout:[^\\s]+'
+            r'shaikhdocker/netflix:[^\\s]+'
         )
         
         text, count = re.subn(
