@@ -8,7 +8,7 @@ pipeline {
     }
 
     environment {
-        IMAGE_REPO = 'shaikhdocker/netflix'
+        IMAGE_REPO = 'shaikhdocker/netflix/ArgoRollout'
         GITOPS_REPO = 'https://github.com/shaikh4git/Netflix-GitOps.git'
         GITOPS_BRANCH = 'main'
     }
@@ -122,21 +122,21 @@ pipeline {
         
                         cd gitops
         
-                        test -f netflix/rollout.yaml
+                        test -f netflix/ArgoRollout/rollout.yaml
         
                         python3 - <<'PY'
         import os
         import re
         from pathlib import Path
         
-        path = Path("netflix/rollout.yaml")
+        path = Path("netflix/ArgoRollout/rollout.yaml")
         text = path.read_text()
         
         image = os.environ["FULL_IMAGE"]
         
         pattern = (
             r'(?m)^(\\s*image:\\s*)'
-            r'shaikhdocker/netflix:[^\\s]+'
+            r'shaikhdocker/netflix/ArgoRollout:[^\\s]+'
         )
         
         text, count = re.subn(
@@ -156,7 +156,7 @@ pipeline {
                         git config user.name "Jenkins CI"
                         git config user.email "jenkins@localhost"
         
-                        git add netflix/rollout.yaml
+                        git add netflix/ArgoRollout/rollout.yaml
         
                         if git diff --cached --quiet; then
                             echo "No GitOps changes required"
