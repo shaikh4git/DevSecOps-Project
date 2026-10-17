@@ -86,11 +86,10 @@ pipeline {
                 '''
             }
         }
-
         stage('Update GitOps Repository') {
-            steps {
-                withCredentials([
-                    usernamePassword(
+             steps {
+                    withCredentials([
+                        usernamePassword(
                         credentialsId: 'github-gitops-token',
                         usernameVariable: 'GIT_USERNAME',
                         passwordVariable: 'GIT_TOKEN'
@@ -100,74 +99,36 @@ pipeline {
                         set -eu
                         set +x
         
-                        AUTH_DIR="$(mktemp -d)"
-                        trap 'rm -rf "$AUTH_DIR"' EXIT
-        
-                        cat > "$AUTH_DIR/askpass.sh" <<'EOF'
-        #!/bin/sh
-        case "$1" in
-          *Username*) printf '%s\\n' "$GIT_USERNAME" ;;
-          *Password*) printf '%s\\n' "$GIT_TOKEN" ;;
-          *) exit 1 ;;
-        esac
-        EOF
-        
-                        chmod 700 "$AUTH_DIR/askpass.sh"
-                        export GIT_ASKPASS="$AUTH_DIR/askpass.sh"
                         export GIT_TERMINAL_PROMPT=0
+                        HELPER='!f() { echo "username=$GIT_USERNAME"; echo "password=$GIT_TOKEN"; }; f'
         
-                        git clone \
-                          --branch "$GITOPS_BRANCH" \
-                          "$GITOPS_REPO" gitops
-        
+                        git -c credential.helper="$HELPER" clone \
+                          --branch "$GITOPS_BRANCH" "$GITOPS_REPO" gitops
                         cd gitops
         
                         test -f netflix/rollout/rollout.yaml
         
-                        python3 - <<'PY'
-        import os
-        import re
-        from pathlib import Path
+                        sed -i -E "s#(image:[[:space:]]*)shaikhdocker/netflix:[^[:space:]]+#\\1${FULL_IMAGE}#" \
+                          netflix/rollout/rollout.yaml
         
-        path = Path("netflix/rollout/rollout.yaml")
-        text = path.read_text()
-        
-        image = os.environ["FULL_IMAGE"]
-        
-        pattern = (
-            r'(?m)^(\\s*image:\\s*)'
-            r'shaikhdocker/netflix:[^\\s]+'
-        )
-        
-        text, count = re.subn(
-            pattern,
-            lambda match: match.group(1) + image,
-            text
-        )
-        
-        if count != 1:
-            raise SystemExit(
-                f"Expected exactly one Netflix image, found {count}"
-            )
-        
-        path.write_text(text)
-        PY
+                        grep -q "image: ${FULL_IMAGE}" netflix/rollout/rollout.yaml \
+                          || { echo "Image line was not updated"; exit 1; }
         
                         git config user.name "Jenkins CI"
                         git config user.email "jenkins@localhost"
-        
                         git add netflix/rollout/rollout.yaml
         
                         if git diff --cached --quiet; then
                             echo "No GitOps changes required"
                         else
-                            git commit -m "Canary Netflix $FULL_IMAGE"
-                            git push origin "HEAD:$GITOPS_BRANCH"
+                            git commit -m "Canary Netflix ${FULL_IMAGE}"
+                            git -c credential.helper="$HELPER" push origin "HEAD:${GITOPS_BRANCH}"
                         fi
                     '''
                 }
             }
         }
+        
         stage('GitOps Commit Published') {
             steps {
                 echo """
@@ -183,7 +144,7 @@ pipeline {
         
                 Monitor:
                 kubectl argo rollouts get rollout netflix \
-                  -n netflix --watch
+                  -n argo-rollouts --watch
                 """
             }
         }
