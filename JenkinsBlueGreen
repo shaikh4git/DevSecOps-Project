@@ -1,4 +1,3 @@
-
 pipeline {
     agent { label 'DevopsAgentLabelV5' }
 
@@ -143,7 +142,7 @@ pipeline {
                   4. Complete deployment at 100%
         
                 Monitor:
-                kubectl argo rollouts get rollout netflix -n argo-rollouts --watch
+                kubectl argo rollouts get rollout netflix -n argo-bluegreen --watch
                 """
             }
         }
